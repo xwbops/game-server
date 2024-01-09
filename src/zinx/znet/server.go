@@ -17,6 +17,8 @@ type Server struct {
 	IP string
 	//服务绑定的端口
 	Port int
+	//当前Server由用户绑定的回调router,也就是Server注册的链接对应的处理业务
+	Router ziface.IRouter
 }
 
 //============== 实现 ziface.IServer 里的全部接口方法 ========
@@ -39,6 +41,7 @@ func (s *Server) Start() {
 		}
 		//已经监听成功
 		fmt.Println("start Zinx server ", s.Name, " success, now listenning...")
+		var cid uint32 = 0
 		// 启动server网络链接业务
 		for {
 			//阻塞等待客户端建立连接请求
@@ -47,25 +50,33 @@ func (s *Server) Start() {
 				fmt.Println("Accept err", err)
 				continue
 			}
+			//3.2 TODO Server.Start() 设置服务器最大连接控制,如果超过最大连接，那么则关闭此新的连接
+
+			//3.3 处理该新连接请求的 业务 方法， 此时应该有 handler 和 conn是绑定的
+			dealConn := NewConnection(conn, cid, s.Router)
+			cid++
+
+			//3.4 启动当前链接的处理业务
+			go dealConn.Start()
 			//TODO Server.Start()设置服务器最大链接控制，如果超过最大连接，那么则关闭新连接
 			//TODO Server.Start()处理该新连接请求的业务方法，此时应该有handler和conn是绑定的
 			//我们这里暂时做一个最大512字节的回显服务
-			go func() {
-				//不断的循环从客户端获取数据
-				for {
-					buf := make([]byte, 512)
-					cnt, err := conn.Read(buf)
-					if err != nil {
-						fmt.Println("recv buf err ", err)
-						continue
-					}
-					//回显
-					if _, err := conn.Write(buf[:cnt]); err != nil {
-						fmt.Println("write back buf err ", err)
-						continue
-					}
-				}
-			}()
+			//go func() {
+			//	//不断的循环从客户端获取数据
+			//	for {
+			//		buf := make([]byte, 512)
+			//		cnt, err := conn.Read(buf)
+			//		if err != nil {
+			//			fmt.Println("recv buf err ", err)
+			//			continue
+			//		}
+			//		//回显
+			//		if _, err := conn.Write(buf[:cnt]); err != nil {
+			//			fmt.Println("write back buf err ", err)
+			//			continue
+			//		}
+			//	}
+			//}()
 		}
 	}()
 }
@@ -86,6 +97,9 @@ func (s *Server) Serve() {
 		time.Sleep(10 * time.Second)
 	}
 }
+func (s *Server) AddRouter(router ziface.IRouter) {
+
+}
 
 //创建一个服务器句柄
 func NewServer(name string) ziface.IServer {
@@ -94,6 +108,7 @@ func NewServer(name string) ziface.IServer {
 		IPVersion: "tcp4",
 		IP:        "0.0.0.0",
 		Port:      7777,
+		Router:    nil,
 	}
 	return s
 }
