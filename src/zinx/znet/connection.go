@@ -36,7 +36,24 @@ func (c *Connection) StartReader() {
 	fmt.Println("Reader Goroutine is running")
 	defer fmt.Println(c.RemoteAddr().String(), " conn reader exit!")
 	defer c.Stop()
-	
+	for {
+		//读取我们最大的数据到buf中
+		buf := make([]byte, 512)
+		cnt, err := c.Conn.Read(buf)
+		if err != nil {
+			fmt.Println("recv buf err ", err)
+			c.ExitBuffChan <- true
+			continue
+		}
+		// 调用当前链接业务（这里执行的是当前的conn绑定的handle方法）
+		if err := c.handleAPI(c.Conn, buf, cnt); err != nil {
+			fmt.Println("connID", c.ConnID, " handle is error")
+			c.ExitBuffChan <- true
+			return
+		}
+
+	}
+
 }
 
 //停止连接，结束当前连接状态M
