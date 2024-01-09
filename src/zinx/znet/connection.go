@@ -36,5 +36,6 @@ func NewConnection(conn *net.TCPConn, connID uint32, callback_api ziface.HandFun
 /*处理conn读数据的Goroutine*/
 func (c *Connection) StartReader() {
 	fmt.Println("Reader Goroutine is running")
-	defer fmt.Println(c.RemoteAddr.String())
+	defer fmt.Println(c.RemoteAddr.String(), " conn reader exit!")
+	defer c.Stop()
 }
