@@ -98,7 +98,7 @@ func (s *Server) Serve() {
 	}
 }
 func (s *Server) AddRouter(router ziface.IRouter) {
-
+	s.Router = router
 }
 
 //创建一个服务器句柄
