@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"time"
+	"zinx/conf"
 	"zinx/ziface"
 )
 
@@ -25,6 +26,10 @@ type Server struct {
 //开启网络服务
 func (s *Server) Start() {
 	fmt.Printf("[START] Server listenner at IP: %s, Port %d, is starting\n", s.IP, s.Port)
+	fmt.Printf("[Zinx] Version: %s, MaxConn: %d,  MaxPacketSize: %d\n",
+		conf.GameConfig.Version,
+		conf.GameConfig.MaxConn,
+		conf.GameConfig.MaxPacketSize)
 	//开启一个go去做服务器listener业务
 	go func() {
 		//获取一个tcp的 addr
@@ -102,12 +107,14 @@ func (s *Server) AddRouter(router ziface.IRouter) {
 }
 
 //创建一个服务器句柄
-func NewServer(name string) ziface.IServer {
+func NewServer() ziface.IServer {
+	//先初始化全局配置文件
+	conf.GameConfig.Reload()
 	s := &Server{
-		Name:      name,
+		Name:      conf.GameConfig.Name,
 		IPVersion: "tcp4",
-		IP:        "0.0.0.0",
-		Port:      7777,
+		IP:        conf.GameConfig.Host,
+		Port:      conf.GameConfig.TcpPort,
 		Router:    nil,
 	}
 	return s

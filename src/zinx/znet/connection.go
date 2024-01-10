@@ -2,6 +2,7 @@ package znet
 
 import (
 	"fmt"
+	"io"
 	"net"
 	"zinx/ziface"
 )
@@ -40,26 +41,47 @@ func (c *Connection) StartReader() {
 	defer fmt.Println(c.RemoteAddr().String(), " conn reader exit!")
 	defer c.Stop()
 	for {
+		// 创建拆包解包的对象
+		dp := NewDataPack()
 		//读取我们最大的数据到buf中
-		buf := make([]byte, 512)
-		cnt, err := c.Conn.Read(buf)
-		fmt.Println(cnt)
-		if err != nil {
-			fmt.Println("recv buf err ", err)
+		headBuf := make([]byte, dp.GetHeadLen())
+		//cnt, err := c.Conn.Read(buf)
+		//fmt.Println(cnt)
+		if _, err := io.ReadFull(c.GetTCPConnection(), headBuf); err != nil {
+			fmt.Println("read msg head error ", err)
 			c.ExitBuffChan <- true
 			continue
 		}
-		//得到当前客户端请求的Request数据
-		req := Request{
-			conn: c,
-			data: buf,
+		//拆包，得到msgid 和 datalen 放在msg中
+		msg, err := dp.Unpack(headBuf)
+		if err != nil {
+			fmt.Println("unpack error ", err)
+			c.ExitBuffChan <- true
+			continue
 		}
+		var dataBuf []byte
+		if msg.GetDataLen() > 0 {
+			dataBuf = make([]byte, msg.GetDataLen())
+			if _, err := io.ReadFull(c.GetTCPConnection(), dataBuf); err != nil {
+				fmt.Println("read msg data error ", err)
+				c.ExitBuffChan <- true
+				continue
+			}
+		}
+		msg.SetData(dataBuf)
+		//根据 dataLen 读取 data，放在msg.Data中
+
 		// 调用当前链接业务（这里执行的是当前的conn绑定的handle方法）
 		//if err := c.handleAPI(c.Conn, buf, cnt); err != nil {
 		//	fmt.Println("connID", c.ConnID, " handle is error")
 		//	c.ExitBuffChan <- true
 		//	return
 		//}
+		//得到当前客户端请求的Request数据
+		req := Request{
+			conn: c,
+			msg:  msg, //将之前的buf 改成 msg
+		}
 		//从路由Routers 中找到注册绑定Conn的对应Handle
 		go func(request ziface.IRequest) {
 			fmt.Println(string(request.GetData()))
