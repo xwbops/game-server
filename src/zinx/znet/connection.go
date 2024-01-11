@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"zinx/conf"
 	"zinx/ziface"
 )
 
@@ -90,12 +91,19 @@ func (c *Connection) StartReader() {
 		}
 		//从路由Routers 中找到注册绑定Conn的对应Handle
 		//从绑定好的消息和对应的处理方法中执行对应的Handle方法
-		go func(request ziface.IRequest) {
-			fmt.Println(string(request.GetData()))
-			//执行注册的路由方法
-			//fmt.Println(c.Router)
-			c.msgHandler.DoMsgHandler(request)
-		}(&req)
+		//go func(request ziface.IRequest) {
+		//	fmt.Println(string(request.GetData()))
+		//	//执行注册的路由方法
+		//	//fmt.Println(c.Router)
+		//	c.msgHandler.DoMsgHandler(request)
+		//}(&req)
+		if conf.GameConfig.WorkerPoolSize > 0 {
+			//已经启动工作池机制，将消息交给Worker处理
+			c.msgHandler.SendMsgToTaskQueue(&req)
+		} else {
+			//从绑定好的消息和对应的处理方法中执行对应的Handle方法
+			go c.msgHandler.DoMsgHandler(&req)
+		}
 	}
 
 }

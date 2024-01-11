@@ -34,6 +34,8 @@ func (s *Server) Start() {
 		conf.GameConfig.MaxPacketSize)
 	//开启一个go去做服务器listener业务
 	go func() {
+		//0 启动worker工作池机制
+		s.msgHandler.StartWorkerPool()
 		//获取一个tcp的 addr
 		addr, err := net.ResolveTCPAddr(s.IPVersion, fmt.Sprintf("%s:%d", s.IP, s.Port))
 		if err != nil {
