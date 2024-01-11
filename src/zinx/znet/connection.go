@@ -22,15 +22,16 @@ type Connection struct {
 	ExitBuffChan chan bool
 
 	//该连接的处理方法router
-	Router ziface.IRouter
+	//Router ziface.IRouter
+	msgHandler ziface.IMsgHandle
 }
 
-func NewConnection(conn *net.TCPConn, connID uint32, router ziface.IRouter) *Connection {
+func NewConnection(conn *net.TCPConn, connID uint32, msgHandler ziface.IMsgHandle) *Connection {
 	c := &Connection{
 		Conn:         conn,
 		ConnID:       connID,
 		isClosed:     false,
-		Router:       router,
+		msgHandler:   msgHandler,
 		ExitBuffChan: make(chan bool, 1),
 	}
 	return c
@@ -84,13 +85,12 @@ func (c *Connection) StartReader() {
 			msg:  msg, //将之前的buf 改成 msg
 		}
 		//从路由Routers 中找到注册绑定Conn的对应Handle
+		//从绑定好的消息和对应的处理方法中执行对应的Handle方法
 		go func(request ziface.IRequest) {
 			fmt.Println(string(request.GetData()))
 			//执行注册的路由方法
-			fmt.Println(c.Router)
-			c.Router.PreHandle(request)
-			c.Router.Handle(request)
-			c.Router.PostHandle(request)
+			//fmt.Println(c.Router)
+			c.msgHandler.DoMsgHandler(request)
 		}(&req)
 	}
 
