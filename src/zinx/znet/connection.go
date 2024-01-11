@@ -1,6 +1,7 @@
 package znet
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -43,7 +44,7 @@ func (c *Connection) StartReader() {
 	for {
 		// 创建拆包解包的对象
 		dp := NewDataPack()
-		//读取我们最大的数据到buf中
+		//读取客户端的Msg head
 		headBuf := make([]byte, dp.GetHeadLen())
 		//cnt, err := c.Conn.Read(buf)
 		//fmt.Println(cnt)
@@ -141,4 +142,26 @@ func (c *Connection) GetTCPConnection() *net.TCPConn {
 // 获取远程客户端地址
 func (c *Connection) RemoteAddr() net.Addr {
 	return c.Conn.RemoteAddr()
+}
+
+//直接将Message数据发送数据给远程的TCP客户端
+func (c *Connection) SendMsg(msgId uint32, data []byte) error {
+	if c.isClosed == true {
+		return errors.New("connection is closed when send msg")
+	}
+	msg := NewMessage(msgId, data)
+	//将data封装包并且发送
+	dp := NewDataPack()
+	msgData, err := dp.Pack(msg)
+	if err != nil {
+		fmt.Println("Pack error msg id = ", msgId)
+		return errors.New("Pack error msg ")
+	}
+	//写回客户端
+	if _, err := c.Conn.Write(msgData); err != nil {
+		fmt.Println("Write msg id ", msgId, " error ")
+		c.ExitBuffChan <- true
+		return errors.New("conn Write error")
+	}
+	return nil
 }
