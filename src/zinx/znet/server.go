@@ -22,6 +22,8 @@ type Server struct {
 	//Router ziface.IRouter
 	//当前Server的消息管理模块，用来绑定MsgId和对应的处理方法
 	msgHandler ziface.IMsgHandle
+	//当前Server的链接管理器
+	ConnMgr ziface.IConnManager
 }
 
 //============== 实现 ziface.IServer 里的全部接口方法 ========
@@ -60,9 +62,16 @@ func (s *Server) Start() {
 				continue
 			}
 			//3.2 TODO Server.Start() 设置服务器最大连接控制,如果超过最大连接，那么则关闭此新的连接
-
+			//=============
+			//3.2 设置服务器最大连接控制,如果超过最大连接，那么则关闭此新的连接
+			if s.ConnMgr.Len() >= conf.GameConfig.MaxConn {
+				fmt.Println("conn closed, connections has been exceeded: ", conf.GameConfig.MaxConn)
+				conn.Close()
+				continue
+			}
+			//=============
 			//3.3 处理该新连接请求的 业务 方法， 此时应该有 handler 和 conn是绑定的
-			dealConn := NewConnection(conn, cid, s.msgHandler)
+			dealConn := NewConnection(s, conn, cid, s.msgHandler)
 			cid++
 
 			//3.4 启动当前链接的处理业务
@@ -94,6 +103,7 @@ func (s *Server) Start() {
 func (s *Server) Stop() {
 	fmt.Println("[STOP] Zinx server , name ", s.Name)
 	//TODO Server.Stop()将其他需要清理的连接信息或者其他信息也要一并停止或者清理
+	s.ConnMgr.ClearConn()
 }
 
 //开启业务服务器方法
@@ -110,6 +120,11 @@ func (s *Server) AddRouter(msgId uint32, router ziface.IRouter) {
 	s.msgHandler.AddRouter(msgId, router)
 }
 
+//获取链接管理器
+func (s *Server) GetConnMgr() ziface.IConnManager {
+	return s.ConnMgr
+}
+
 //创建一个服务器句柄
 func NewServer() ziface.IServer {
 	//先初始化全局配置文件
@@ -120,7 +135,8 @@ func NewServer() ziface.IServer {
 		IP:        conf.GameConfig.Host,
 		Port:      conf.GameConfig.TcpPort,
 		//当前Server的消息管理模块，用来绑定MsgId和对应的处理方法
-		msgHandler: NewMsgHandle(), //msgHandler 初始化
+		msgHandler: NewMsgHandle(),   //msgHandler 初始化
+		ConnMgr:    NewConnManager(), //创建ConnManager
 	}
 	return s
 }

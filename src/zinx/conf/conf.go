@@ -18,6 +18,7 @@ type Conf struct {
 	MaxConn          int            //当前服务器主机允许的最大链接个数
 	WorkerPoolSize   uint32         //业务工作Worker池的数量
 	MaxWorkerTaskLen uint32         //业务工作Worker对应负责的任务队列最大任务存储数量
+	MaxMsgChanLen    uint32         //有缓冲通道长度
 }
 
 func (c *Conf) Reload() {
