@@ -153,13 +153,17 @@ func (c *Connection) Start() {
 	go c.StartReader()
 	//2 开启用于写回客户端数据流程的Goroutine
 	go c.StartWriter()
-	for {
-		select {
-		case <-c.ExitBuffChan:
-			//得到退出消息，不再阻塞
-			return
-		}
-	}
+	//==================
+	//按照用户传递进来的创建连接时需要处理的业务，执行钩子方法
+	c.TcpServer.CallOnConnStart(c)
+	//==================
+	//for {
+	//	select {
+	//	case <-c.ExitBuffChan:
+	//		//得到退出消息，不再阻塞
+	//		return
+	//	}
+	//}
 }
 
 //停止连接，结束当前连接状态M
@@ -171,6 +175,10 @@ func (c *Connection) Stop() {
 	}
 	c.isClosed = true
 
+	//==================
+	//如果用户注册了该链接的关闭回调业务，那么在此刻应该显示调用
+	c.TcpServer.CallOnConnStop(c)
+	//==================
 	//TODO Connection Stop() 如果用户注册了该链接的关闭回调业务，那么在此刻应该显示调用
 
 	// 关闭socket链接

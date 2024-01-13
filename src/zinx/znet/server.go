@@ -24,6 +24,32 @@ type Server struct {
 	msgHandler ziface.IMsgHandle
 	//当前Server的链接管理器
 	ConnMgr ziface.IConnManager
+
+	// =======================
+	//新增两个hook函数原型
+
+	//该Server的连接创建时Hook函数
+	OnConnStart func(conn ziface.IConnection)
+	//该Server的连接断开时的Hook函数
+	OnConnStop func(conn ziface.IConnection)
+
+	// =======================
+}
+
+//创建一个服务器句柄
+func NewServer() ziface.IServer {
+	//先初始化全局配置文件
+	conf.GameConfig.Reload()
+	s := &Server{
+		Name:      conf.GameConfig.Name,
+		IPVersion: "tcp4",
+		IP:        conf.GameConfig.Host,
+		Port:      conf.GameConfig.TcpPort,
+		//当前Server的消息管理模块，用来绑定MsgId和对应的处理方法
+		msgHandler: NewMsgHandle(),   //msgHandler 初始化
+		ConnMgr:    NewConnManager(), //创建ConnManager
+	}
+	return s
 }
 
 //============== 实现 ziface.IServer 里的全部接口方法 ========
@@ -125,18 +151,28 @@ func (s *Server) GetConnMgr() ziface.IConnManager {
 	return s.ConnMgr
 }
 
-//创建一个服务器句柄
-func NewServer() ziface.IServer {
-	//先初始化全局配置文件
-	conf.GameConfig.Reload()
-	s := &Server{
-		Name:      conf.GameConfig.Name,
-		IPVersion: "tcp4",
-		IP:        conf.GameConfig.Host,
-		Port:      conf.GameConfig.TcpPort,
-		//当前Server的消息管理模块，用来绑定MsgId和对应的处理方法
-		msgHandler: NewMsgHandle(),   //msgHandler 初始化
-		ConnMgr:    NewConnManager(), //创建ConnManager
+//设置该Server的连接创建时Hook函数
+func (s *Server) SetOnConnStart(hookFunc func(connection ziface.IConnection)) {
+	s.OnConnStart = hookFunc
+}
+
+//设置该Server的连接断开时的Hook函数
+func (s *Server) SetOnConnStop(hookFunc func(connection ziface.IConnection)) {
+	s.OnConnStop = hookFunc
+}
+
+//调用连接OnConnStart Hook函数
+func (s *Server) CallOnConnStart(conn ziface.IConnection) {
+	if s.OnConnStart != nil {
+		fmt.Println("---> CallOnConnStart....")
+		s.OnConnStart(conn)
 	}
-	return s
+}
+
+//调用连接OnConnStop Hook函数
+func (s *Server) CallOnConnStop(conn ziface.IConnection) {
+	if s.OnConnStop != nil {
+		fmt.Println("---> CallOnConnStop....")
+		s.OnConnStop(conn)
+	}
 }
