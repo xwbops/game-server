@@ -21,7 +21,7 @@ func (m *Message) GetDataLen() uint32 {
 }
 
 //获取消息ID
-func (m *Message) GetMsgId() uint32 {
+func (m *Message) GetMsgID() uint32 {
 	return m.Id
 }
 
@@ -36,7 +36,7 @@ func (m *Message) SetDataLen(len uint32) {
 }
 
 //设计消息ID
-func (m *Message) SetMsgId(id uint32) {
+func (m *Message) SetMsgID(id uint32) {
 	m.Id = id
 }
 

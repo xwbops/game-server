@@ -18,6 +18,6 @@ func (r *Request) GetData() []byte {
 }
 
 //获取消息id
-func (r *Request) GetMsgId() uint32 {
-	return r.msg.GetMsgId()
+func (r *Request) GetMsgID() uint32 {
+	return r.msg.GetMsgID()
 }

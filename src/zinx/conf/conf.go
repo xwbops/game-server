@@ -23,7 +23,7 @@ type Conf struct {
 
 func (c *Conf) Reload() {
 	fmt.Println(os.Getwd())
-	data, err := ioutil.ReadFile("conf.json")
+	data, err := ioutil.ReadFile("conf/conf.json")
 	if err != nil {
 		panic(err)
 	}
@@ -54,6 +54,7 @@ func init() {
 		MaxPacketSize:    4096,
 		WorkerPoolSize:   10,
 		MaxWorkerTaskLen: 1024, //业务工作Worker对应负责的任务队列最大任务存储数量
+
 	}
 
 	//从配置文件中加载一些用户配置的参数
