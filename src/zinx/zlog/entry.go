@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+//将日志输出到支持的输出中。
 type Entry struct {
 	logger *logger
 	Buffer *bytes.Buffer
@@ -41,20 +42,26 @@ func (e *Entry) write(level Level, format string, args ...interface{}) {
 			e.File = "???"
 			e.Func = "???"
 		} else {
-			e.File, e.Line, e.Func = file, line, runtime.FuncForPC(pc).Name()
+			e.File, e.Line, e.Func = file, line, runtime.FuncForPC(pc).Name() //runtime.Caller() 来获取文件名和行号，调用runtime.Caller() 时，要注意传入正确的栈深度。
 			e.Func = e.Func[strings.LastIndex(e.Func, "/")+1:]
 		}
 	}
-
+	e.format()
+	e.writer()
+	e.release()
 }
 func (e *Entry) format() {
 	_ = e.logger.opt.formatter.Format(e)
 }
+
+//即可将日志写入到指定的位置中
 func (e *Entry) writer() {
 	e.logger.mu.Lock()
 	_, _ = e.logger.opt.output.Write(e.Buffer.Bytes())
 	e.logger.mu.Unlock()
 }
+
+//调用release()方法来清空缓存和对象池
 func (e *Entry) release() {
 	e.Args, e.Line, e.File, e.Format, e.Func = nil, 0, "", "", ""
 	e.Buffer.Reset()

@@ -1,0 +1,2 @@
+{"level":"INFO","time":"2024-01-15T22:01:09+08:00","file":"/Users/binwen/Documents/xwbops/GoProjects/game-server/src/zinx/zlog/example/example.go:28","func":"main.main","message":"custom log with json formatter"}
+{"time":"2024-01-15T22:01:59+08:00","file":"/Users/binwen/Documents/xwbops/GoProjects/game-server/src/zinx/zlog/example/main.go:25","func":"main.main","message":"custom log with json formatter","level":"INFO"}

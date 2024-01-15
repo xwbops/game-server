@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+//自定义日志输出格式。
 // 文本格式formatter
 type TextFormatter struct {
 	IgnoreBasicFields bool
