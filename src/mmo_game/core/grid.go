@@ -39,7 +39,7 @@ func (g *Grid) AddPlayer(playerId int) {
 }
 
 //向当前格子中删除一个玩家
-func (g *Grid) DeletePlayer(playerId int) {
+func (g *Grid) RemovePlayer(playerId int) {
 	g.pIDLock.Lock()
 	defer g.pIDLock.Unlock()
 	delete(g.playerIDs, playerId)

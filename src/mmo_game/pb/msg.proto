@@ -1,26 +1,47 @@
 syntax = "proto3";//Proto协议
 package pb;//当前包名
-option go_package="./";
+option go_package="./pb";
 option csharp_namespace="Pb";//给C#提供的选项
 
-//同步客户端玩家ID
+//MsgID: 1:同步客户端玩家ID,同步玩家本次登录的ID(用来标识玩家), 玩家登陆之后，由Server端主动生成玩家ID发送给客户端
+// 发起者： Server
 message SyncPid {
   int32 Pid = 1;
 }
-//玩家位置
+//MsgID: 2:同步玩家本次登录的ID(用来标识玩家), 玩家登陆之后，由Server端主动生成玩家ID发送给客户端
+//发起者： Client Content: 聊天信息
+message Talk {
+  string Content = 1;
+}
+//MsgID: 3:玩家位置，坐标信息,移动的坐标数据
+//发起者： Client P: Position类型，地图的左边点
 message Position {
   float X = 1;
   float Y = 2;
   float Z = 3;
   float V = 4;
 }
-//玩家广播数据
+//MsgID: 200, 发起者： Server 玩家广播数据
 message BroadCast {
-  int32 Pid = 1;
-  int32 Tp = 2;
+  int32 Pid = 1; // 玩家ID
+  int32 Tp = 2; //
   oneof Data {
-    string Content = 3;
-    Position P = 4;
+    string Content = 3; //世界聊天
+    Position P = 4; // 坐标
     int32 ActionData = 5;
   }
 }
+// MsgID: 201 广播消息 掉线/aoi消失在视野
+//发起者： Server Pid: 玩家ID
+
+//MsgID: 202 同步周围的人位置信息(包括自己) 发起者： Server ps: Player 集合,需要同步的玩家
+
+message SyncPlayers{
+  repeated Player ps=1;
+}
+
+message Player{
+  int32 Pid=1;
+  Position P=2;
+}
+

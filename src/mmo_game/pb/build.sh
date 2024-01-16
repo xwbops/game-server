@@ -1,2 +1,2 @@
 #!/bin/bash
-protoc --go_out=. msg.proto
+protoc --proto_path=. --go_out=. *.proto
