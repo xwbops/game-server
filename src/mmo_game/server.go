@@ -5,11 +5,13 @@ import (
 	"mmo_game/api"
 	"mmo_game/core"
 	"zinx/ziface"
+	"zinx/zlog"
 	"zinx/znet"
 )
 
 //当客户端断开连接的时候的hook函数
 func OnConnectionLost(conn ziface.IConnection) {
+	zlog.Info("colsexxxxxxxxxxxxxxxxxxxxx")
 	//获取当前连接的Pid属性
 	pid, _ := conn.GetProperty("pid")
 

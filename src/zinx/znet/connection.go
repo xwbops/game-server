@@ -74,22 +74,24 @@ func (c *Connection) StartReader() {
 		//fmt.Println(cnt)
 		if _, err := io.ReadFull(c.GetTCPConnection(), headBuf); err != nil {
 			fmt.Println("read msg head error ", err)
-			c.ExitBuffChan <- true
-			continue
+			break
+			//c.ExitBuffChan <- true
+			//continue
 		}
 		//拆包，得到msgid 和 datalen 放在msg中
 		msg, err := dp.Unpack(headBuf)
 		if err != nil {
 			fmt.Println("unpack error ", err)
-			c.ExitBuffChan <- true
-			continue
+			break
+			//c.ExitBuffChan <- true
+			//continue
 		}
 		var dataBuf []byte
 		if msg.GetDataLen() > 0 {
 			dataBuf = make([]byte, msg.GetDataLen())
 			if _, err := io.ReadFull(c.GetTCPConnection(), dataBuf); err != nil {
 				fmt.Println("read msg data error ", err)
-				c.ExitBuffChan <- true
+				//c.ExitBuffChan <- true
 				continue
 			}
 		}
