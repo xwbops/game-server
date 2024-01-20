@@ -1,10 +1,10 @@
 package znet
 
 import (
-	"fmt"
 	"strconv"
 	"zinx/conf"
 	"zinx/ziface"
+	"zinx/zlog"
 )
 
 type MsgHandle struct {
@@ -26,7 +26,7 @@ func NewMsgHandle() *MsgHandle {
 func (mh *MsgHandle) DoMsgHandler(request ziface.IRequest) {
 	router, ok := mh.Handlers[request.GetMsgID()]
 	if !ok {
-		fmt.Println("api msgId = ", request.GetMsgID(), " is not Found!")
+		zlog.Error("api handler msgId = ", request.GetMsgID(), " is not Found!")
 		return
 	}
 	//执行对应处理方法
@@ -41,12 +41,12 @@ func (mh *MsgHandle) AddRouter(msgId uint32, router ziface.IRouter) {
 		panic("repeated handle , msgId = " + strconv.Itoa(int(msgId)))
 	}
 	mh.Handlers[msgId] = router
-	fmt.Println("Add handler msgId = ", msgId)
+	zlog.Info("Add handler msgId = ", msgId)
 }
 
 //启动一个Worker工作流程
 func (mh *MsgHandle) StartOneWorker(workerID int, taskQueue chan ziface.IRequest) {
-	fmt.Println("Worker ID = ", workerID, " is started.")
+	zlog.Info("Worker ID = ", workerID, " is started.")
 	//不断的等待队列中的消息
 	for {
 		select {
@@ -75,7 +75,7 @@ func (mh *MsgHandle) SendMsgToTaskQueue(request ziface.IRequest) {
 
 	//得到需要处理此条连接的workerID
 	workerID := request.GetConnection().GetConnID() % mh.WorkerPoolSize
-	fmt.Println("Add ConnID=", request.GetConnection().GetConnID(), " request msgID=", request.GetMsgID(), "to workerID=", workerID)
+	zlog.Info("Add ConnID=", request.GetConnection().GetConnID(), " request msgID=", request.GetMsgID(), "to workerID=", workerID)
 	//将请求消息发送给任务队列
 	mh.TaskQueue[workerID] <- request
 }

@@ -1,1 +1,1 @@
-/Users/binwen/Downloads/DouDiZhu-master/Card
+/Users/binwen/Documents/xwbops/GoProjects/game-server/src/ddz/Client

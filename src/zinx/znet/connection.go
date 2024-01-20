@@ -2,12 +2,12 @@ package znet
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"net"
 	"sync"
 	"zinx/conf"
 	"zinx/ziface"
+	"zinx/zlog"
 )
 
 type Connection struct {
@@ -62,8 +62,8 @@ func NewConnection(server ziface.IServer, conn *net.TCPConn, connID uint32, msgH
 
 /*处理conn读数据的Goroutine*/
 func (c *Connection) StartReader() {
-	fmt.Println("Reader Goroutine is running")
-	defer fmt.Println(c.RemoteAddr().String(), " conn reader exit!")
+	zlog.Info("Reader Goroutine is running")
+	defer zlog.Info(c.RemoteAddr().String(), " conn reader exit!")
 	defer c.Stop()
 	for {
 		// 创建拆包解包的对象
@@ -73,7 +73,7 @@ func (c *Connection) StartReader() {
 		//cnt, err := c.Conn.Read(buf)
 		//fmt.Println(cnt)
 		if _, err := io.ReadFull(c.GetTCPConnection(), headBuf); err != nil {
-			fmt.Println("read msg head error ", err)
+			zlog.Error("read msg head error: ", err)
 			break
 			//c.ExitBuffChan <- true
 			//continue
@@ -81,7 +81,7 @@ func (c *Connection) StartReader() {
 		//拆包，得到msgid 和 datalen 放在msg中
 		msg, err := dp.Unpack(headBuf)
 		if err != nil {
-			fmt.Println("unpack error ", err)
+			zlog.Error("unpack error: ", err)
 			break
 			//c.ExitBuffChan <- true
 			//continue
@@ -90,7 +90,7 @@ func (c *Connection) StartReader() {
 		if msg.GetDataLen() > 0 {
 			dataBuf = make([]byte, msg.GetDataLen())
 			if _, err := io.ReadFull(c.GetTCPConnection(), dataBuf); err != nil {
-				fmt.Println("read msg data error ", err)
+				zlog.Error("read msg data error: ", err)
 				//c.ExitBuffChan <- true
 				continue
 			}
@@ -128,14 +128,14 @@ func (c *Connection) StartReader() {
 
 }
 func (c *Connection) StartWriter() {
-	fmt.Println("[Writer Goroutine is running]")
-	defer fmt.Println(c.RemoteAddr().String(), "[conn Writer exit!]")
+	zlog.Info("[Writer Goroutine is running]")
+	defer zlog.Info(c.RemoteAddr().String(), "[conn Writer exit!]")
 	for {
 		select {
 		case msgData := <-c.MsgChan:
 			//有数据要写给客户端
 			if _, err := c.Conn.Write(msgData); err != nil {
-				fmt.Println("Send Data error:, ", err, " Conn Writer exit")
+				zlog.Error("Send Data error:, ", err, " Conn Writer exit")
 				return
 			}
 		// 针对有缓冲channel需要些的数据处理
@@ -143,11 +143,11 @@ func (c *Connection) StartWriter() {
 			if ok {
 				//有数据要写给客户端
 				if _, err := c.Conn.Write(msgData); err != nil {
-					fmt.Println("Send Buff Data error:, ", err, " Conn Writer exit")
+					zlog.Error("Send Buff Data error: ", err, " Conn Writer exit")
 					return
 				}
 			} else {
-				fmt.Println("msgBuffChan is closed")
+				zlog.Info("MsgBuffChan is closed")
 				break
 			}
 		case <-c.ExitBuffChan:
@@ -179,7 +179,7 @@ func (c *Connection) Start() {
 
 //停止连接，结束当前连接状态M
 func (c *Connection) Stop() {
-	fmt.Println("Conn Stop()...ConnID = ", c.ConnID)
+	zlog.Info("Conn Stop()...ConnID = ", c.ConnID)
 	//1. 如果当前链接已经关闭
 	if c.isClosed == true {
 		return
@@ -231,7 +231,7 @@ func (c *Connection) SendMsg(msgId uint32, data []byte) error {
 	dp := NewDataPack()
 	msgData, err := dp.Pack(msg)
 	if err != nil {
-		fmt.Println("Pack error msg id = ", msgId)
+		zlog.Error("Pack error msg id = ", msgId)
 		return errors.New("Pack error msg ")
 	}
 	//写回客户端
@@ -256,7 +256,7 @@ func (c *Connection) SendBuffMsg(msgId uint32, data []byte) error {
 	dp := NewDataPack()
 	msgData, err := dp.Pack(msg)
 	if err != nil {
-		fmt.Println("Pack error msg id = ", msgId)
+		zlog.Error("Pack error msg id = ", msgId)
 		return errors.New("Pack error msg ")
 	}
 	//写回客户端

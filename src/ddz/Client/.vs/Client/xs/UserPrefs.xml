@@ -1,0 +1,41 @@
+﻿<Properties StartupConfiguration="{12F44184-A422-5F27-22E6-507969043F15}|">
+  <MonoDevelop.Ide.ItemProperties.Assembly-CSharp PreferredExecutionTarget="6732bdef-0927-4a5f-a570-da5a2f576ad7" />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Net/NetManager.cs">
+    <Files>
+      <File FileName="Assets/Test.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/Net/ClientPeer.cs" Line="52" Column="5" />
+      <File FileName="Assets/Scripts/Net/EncodeTool.cs" Line="23" Column="1" />
+      <File FileName="Assets/Scripts/Framework/AreaCode.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/Framework/ManagerBase.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/Framework/MonoSingleton.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/Net/Impl/AccoutHandler.cs" Line="1" Column="20" />
+      <File FileName="Assets/Scripts/Net/Msg/NetSendMsg.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/Net/HandlerBase.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/Net/NetManager.cs" Line="53" Column="5" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="Client">
+            <Node name="Assets" expanded="True">
+              <Node name="Scripts" expanded="True">
+                <Node name="Framework" expanded="True" />
+                <Node name="Net" expanded="True">
+                  <Node name="Impl" expanded="True" />
+                  <Node name="Msg" expanded="True" />
+                  <Node name="NetManager.cs" selected="True" />
+                </Node>
+              </Node>
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>

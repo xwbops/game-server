@@ -2,9 +2,7 @@ package conf
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
-	"os"
 	"zinx/ziface"
 )
 
@@ -22,7 +20,6 @@ type Conf struct {
 }
 
 func (c *Conf) Reload() {
-	fmt.Println(os.Getwd())
 	data, err := ioutil.ReadFile("conf/conf.json")
 	if err != nil {
 		panic(err)
@@ -46,10 +43,10 @@ var GameConfig *Conf
 func init() {
 	//初始化GlobalObject变量，设置一些默认值
 	GameConfig = &Conf{
-		Name:             "ZinxServerApp",
-		Version:          "V0.4",
+		Name:             "",
+		Version:          "",
 		TcpPort:          7777,
-		Host:             "0.0.0.0",
+		Host:             "",
 		MaxConn:          12000,
 		MaxPacketSize:    4096,
 		WorkerPoolSize:   10,

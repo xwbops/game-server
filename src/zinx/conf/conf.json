@@ -1,9 +1,0 @@
-{
-  "Name":"zinx server",
-  "Host":"127.0.0.1",
-  "TcpPort":7777,
-  "MaxConn":30,
-  "WorkerPoolSize": 10,
-  "MaxWorkerTaskLen": 1024,
-  "MaxMsgChanLen": 10,
-}
